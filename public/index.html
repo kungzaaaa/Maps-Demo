@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบเยี่ยมบ้านผู้ป่วย | Home Visit Management</title>
+  <meta name="description" content="Premium Home Visit Management System Dashboard">
+  <meta name="theme-color" content="#0a0f1a">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- Login Page -->
+  <div id="login-page" class="page active">
+    <div class="auth-card glass-panel">
+      <div class="auth-header">
+        <div class="logo-pulse">
+          <i class="fas fa-heartbeat"></i>
+        </div>
+        <h1>HV System</h1>
+        <p>ระบบจัดการการเยี่ยมบ้านผู้ป่วย<br>Home Visit Management System</p>
+      </div>
+      <form id="login-form" class="auth-form">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Username</label>
+          <input type="text" name="username" required placeholder="Enter your username">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" name="password" required placeholder="Enter your password">
+        </div>
+        <button type="submit" class="btn-primary btn-block">Login</button>
+        <p class="auth-switch" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 12px;"><i
+            class="fas fa-info-circle"></i> ติดต่อผู้ดูแลระบบเพื่อขอบัญชีผู้ใช้<br>Contact administrator for an account
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App (Map + Everything) -->
+  <div id="app-page" class="page">
+    <!-- Hamburger Button -->
+    <button id="hamburger-btn" class="hamburger-btn">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Dark/Light Mode">
+      <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- User info badge -->
+    <div id="user-badge" class="user-badge glass-panel">
+      <i class="fas fa-user-md"></i>
+      <span id="user-name">Loading...</span>
+    </div>
+
+    <!-- Map Container -->
+    <div id="map-container">
+      <div id="map"></div>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <nav id="sidebar" class="sidebar glass-panel">
+      <div class="sidebar-header">
+        <div class="sidebar-logo logo-pulse">
+          <i class="fas fa-heartbeat"></i>
+          <h2>HV System</h2>
+        </div>
+        <button id="close-sidebar" class="close-sidebar">&times;</button>
+      </div>
+      <div class="sidebar-user-info" id="sidebar-user-details">
+        <!-- Filled by JS -->
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="#" data-page="map"><i class="fas fa-map-marked-alt"></i> Map</a></li>
+        <li><a href="#" data-page="patients"><i class="fas fa-users"></i> Patients</a></li>
+        <li><a href="#" data-page="visits-today"><i class="fas fa-calendar-day"></i> Today's Visits</a></li>
+        <li><a href="#" data-page="upcoming"><i class="fas fa-calendar-alt"></i> Upcoming</a></li>
+        <li><a href="#" data-page="dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a></li>
+        <li><a href="#" data-page="profile"><i class="fas fa-user-circle"></i> Profile</a></li>
+        <li id="admin-menu-item" class="admin-only" style="display: none;"><a href="#" data-page="admin"><i
+              class="fas fa-cog"></i> Admin</a></li>
+        <li class="menu-divider"></li>
+        <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </nav>
+
+    <!-- Content Panels -->
+    <!-- Patient List Panel -->
+    <div id="patient-list-panel" class="content-panel glass-panel">
+      <div class="panel-header">
+        <h2><i class="fas fa-users"></i> Patient List</h2>
+        <button class="close-panel-btn">&times;</button>
+      </div>
+      <div class="panel-toolbar">
+        <input type="text" id="patient-search" class="glass-input" placeholder="Search..." />
+        <select id="patient-status-filter" class="glass-input">
+          <option value="">ทั้งหมด / All</option>
+          <option value="active">Active</option>
+          <option value="critical">Critical</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <button id="add-patient-btn" class="btn-primary"><i class="fas fa-plus"></i> เพิ่มผู้ป่วย</button>
+      </div>
+      <div id="patient-list" class="patient-list custom-scrollbar"></div>
+    </div>
+
+    <!-- Today's Visits Panel -->
+    <div id="visits-today-panel" class="content-panel glass-panel">
+      <div class="panel-header">
+        <h2><i class="fas fa-calendar-day"></i> Today's Visits</h2>
+        <button class="close-panel-btn">&times;</button>
+      </div>
+      <div id="today-visits-list" class="visit-list custom-scrollbar"></div>
+    </div>
+
+    <!-- Upcoming Visits Panel -->
+    <div id="upcoming-panel" class="content-panel glass-panel">
+      <div class="panel-header">
+        <h2><i class="fas fa-calendar-alt"></i> Upcoming (7 Days)</h2>
+        <button class="close-panel-btn">&times;</button>
+      </div>
+      <div id="upcoming-visits-list" class="visit-list custom-scrollbar"></div>
+    </div>
+
+    <!-- Dashboard Panel -->
+    <div id="dashboard-panel" class="content-panel glass-panel w-wide">
+      <div class="panel-header">
+        <h2><i class="fas fa-chart-bar"></i> Dashboard</h2>
+        <button class="close-panel-btn">&times;</button>
+      </div>
+      <div id="dashboard-content" class="dashboard-grid custom-scrollbar"></div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="content-panel admin-only glass-panel w-wide">
+      <div class="panel-header">
+        <h2><i class="fas fa-cog"></i>Admin Panel</h2>
+        <button class="close-panel-btn">&times;</button>
+      </div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="users"><i class="fas fa-users-cog"></i> Users</button>
+        <button class="admin-tab" data-tab="add-user"><i class="fas fa-user-plus"></i> Add User</button>
+        <button class="admin-tab" data-tab="audit"><i class="fas fa-history"></i> Audit Log</button>
+      </div>
+      <div id="admin-content" class="custom-scrollbar"></div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal">
+      <div class="modal-content glass-panel">
+        <div class="modal-header">
+          <h2><i class="fas fa-user-circle"></i> โปรไฟล์ของฉัน / My Profile</h2>
+          <button class="close-modal-btn">&times;</button>
+        </div>
+        <div class="admin-tabs profile-tabs">
+          <button class="admin-tab profile-tab active" data-tab="info"><i class="fas fa-id-card"></i> ข้อมูลส่วนตัว /
+            Info</button>
+          <button class="admin-tab profile-tab" data-tab="password"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน /
+            Password</button>
+          <button class="admin-tab profile-tab" data-tab="activity"><i class="fas fa-history"></i> ประวัติกิจกรรม /
+            Activity</button>
+        </div>
+        <div id="profile-content" class="custom-scrollbar" style="padding: 1.5rem;">
+          <!-- Tab 1: Info & Edit -->
+          <div id="profile-tab-info" class="profile-tab-content active">
+            <form id="profile-info-form">
+              <div class="form-group">
+                <label>ชื่อผู้ใช้งาน / Username</label>
+                <input type="text" id="profile-username" class="glass-input" readonly disabled
+                  style="opacity: 0.7; cursor: not-allowed;" />
+              </div>
+              <div class="form-group">
+                <label>บทบาท / Role</label>
+                <input type="text" id="profile-role" class="glass-input" readonly disabled
+                  style="opacity: 0.7; cursor: not-allowed;" />
+              </div>
+              <div class="form-group">
+                <label>ชื่อ-นามสกุล / Full Name *</label>
+                <input type="text" name="full_name" id="profile-fullname" required class="glass-input" />
+              </div>
+              <div class="form-group">
+                <label>อีเมล / Email *</label>
+                <input type="email" name="email" id="profile-email" required class="glass-input" />
+              </div>
+              <div class="form-group">
+                <label>วันที่ลงทะเบียน / Joined Date</label>
+                <input type="text" id="profile-created-at" class="glass-input" readonly disabled
+                  style="opacity: 0.7; cursor: not-allowed;" />
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> บันทึกการเปลี่ยนแปลง /
+                  Save</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Tab 2: Change Password -->
+          <div id="profile-tab-password" class="profile-tab-content" style="display: none;">
+            <form id="profile-password-form">
+              <div class="form-group">
+                <label>รหัสผ่านปัจจุบัน / Current Password *</label>
+                <input type="password" name="current_password" required class="glass-input"
+                  placeholder="ระบุรหัสผ่านปัจจุบัน" />
+              </div>
+              <div class="form-group">
+                <label>รหัสผ่านใหม่ / New Password *</label>
+                <input type="password" name="new_password" required minlength="6" class="glass-input"
+                  placeholder="อย่างน้อย 6 ตัวอักษร" />
+              </div>
+              <div class="form-group">
+                <label>ยืนยันรหัสผ่านใหม่ / Confirm New Password *</label>
+                <input type="password" name="confirm_password" required minlength="6" class="glass-input"
+                  placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" />
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-primary"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน / Change
+                  Password</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Tab 3: Activity Log -->
+          <div id="profile-tab-activity" class="profile-tab-content" style="display: none;">
+            <div id="profile-activity-list">
+              <div style="text-align:center; padding: 2rem;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient Form Modal -->
+    <div id="patient-form-modal" class="modal">
+      <div class="modal-content glass-panel custom-scrollbar">
+        <div class="modal-header">
+          <h2 id="patient-form-title"><i class="fas fa-user-plus"></i> เพิ่มผู้ป่วยใหม่ / Add Patient</h2>
+          <button class="close-modal-btn">&times;</button>
+        </div>
+        <form id="patient-form" class="patient-form">
+          <div class="form-section">
+            <h3><i class="fas fa-id-card"></i> ข้อมูลส่วนตัว / Personal Info</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>ชื่อ-นามสกุล / Full Name *</label>
+                <input type="text" name="name" required class="glass-input" />
+              </div>
+              <div class="form-group">
+                <label>เลขบัตรประชาชน / ID Card</label>
+                <input type="text" name="id_card" maxlength="13" class="glass-input" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>วันเกิด / Birth Date</label>
+                <input type="date" name="birth_date" class="glass-input" />
+              </div>
+              <div class="form-group">
+                <label>เพศ / Gender</label>
+                <select name="gender" class="glass-input">
+                  <option value="">-- เลือก --</option>
+                  <option value="male">ชาย / Male</option>
+                  <option value="female">หญิง / Female</option>
+                  <option value="other">อื่นๆ / Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3><i class="fas fa-phone"></i> ข้อมูลติดต่อ / Contact</h3>
+            <div class="form-group">
+              <label>ที่อยู่ / Address</label>
+              <textarea name="address" rows="2" class="glass-input"></textarea>
+            </div>
+            <div class="form-group">
+              <label>เบอร์โทรศัพท์ / Phone</label>
+              <input type="tel" name="phone" class="glass-input" />
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3><i class="fas fa-heartbeat"></i> ข้อมูลทางการแพทย์ / Medical Info</h3>
+            <div class="form-group">
+              <label>โรคประจำตัว / Chronic Diseases</label>
+              <textarea name="diseases" rows="2" class="glass-input"
+                placeholder="เช่น เบาหวาน, ความดันโลหิตสูง"></textarea>
+            </div>
+            <div class="form-group">
+              <label>ยาที่ใช้ / Current Medications</label>
+              <textarea name="medications" rows="2" class="glass-input"></textarea>
+            </div>
+            <div class="form-group">
+              <label>ประวัติแพ้ยา / Allergies</label>
+              <textarea name="allergies" rows="2" class="glass-input"></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3><i class="fas fa-map-pin"></i> ตำแหน่งที่อยู่ / Location</h3>
+            <p class="form-hint">คลิกบนแผนที่เพื่อเลือกตำแหน่ง / Click on map to select location</p>
+            <div id="location-picker-map" style="height: 250px; border-radius: 12px; margin-bottom: 12px;"></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>ละติจูด / Latitude *</label>
+                <input type="number" name="latitude" step="any" required readonly class="glass-input" />
+              </div>
+              <div class="form-group">
+                <label>ลองจิจูด / Longitude *</label>
+                <input type="number" name="longitude" step="any" required readonly class="glass-input" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3><i class="fas fa-info-circle"></i> สถานะ / Status</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>สถานะผู้ป่วย / Patient Status</label>
+                <select name="status" class="glass-input">
+                  <option value="active">Active - ดูแลต่อเนื่อง</option>
+                  <option value="critical">Critical - วิกฤต</option>
+                  <option value="inactive">Inactive - หยุดดูแล</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>วันนัดเยี่ยมครั้งถัดไป / Next Visit Date</label>
+                <input type="date" name="next_visit_date" class="glass-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>หมายเหตุ / Notes</label>
+              <textarea name="notes" rows="2" class="glass-input"></textarea>
+            </div>
+          </div>
+
+          <input type="hidden" name="id" />
+          <div class="form-actions">
+            <button type="button" class="btn-secondary close-modal-btn">ยกเลิก / Cancel</button>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> บันทึก / Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Patient Detail Modal -->
+    <div id="patient-detail-modal" class="modal">
+      <div class="modal-content modal-lg glass-panel">
+        <div class="modal-header">
+          <h2><i class="fas fa-user"></i> <span id="detail-patient-name"></span></h2>
+          <button class="close-modal-btn">&times;</button>
+        </div>
+        <div id="patient-detail-content" class="custom-scrollbar"></div>
+      </div>
+    </div>
+
+    <!-- Visit Form Modal -->
+    <div id="visit-form-modal" class="modal">
+      <div class="modal-content glass-panel">
+        <div class="modal-header">
+          <h2><i class="fas fa-notes-medical"></i> บันทึกการเยี่ยม / Visit Record</h2>
+          <button class="close-modal-btn">&times;</button>
+        </div>
+        <form id="visit-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>วันที่เยี่ยม / Visit Date *</label>
+              <input type="datetime-local" name="visit_date" required class="glass-input" />
+            </div>
+            <div class="form-group">
+              <label>ประเภท / Visit Type</label>
+              <select name="visit_type" class="glass-input">
+                <option value="routine">Routine - ตามนัด</option>
+                <option value="follow_up">Follow-up - ติดตาม</option>
+                <option value="emergency">Emergency - ฉุกเฉิน</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>อาการ / Symptoms</label>
+            <textarea name="symptoms" rows="2" class="glass-input"></textarea>
+          </div>
+          <div class="form-group">
+            <label>การวินิจฉัย / Diagnosis</label>
+            <textarea name="diagnosis" rows="2" class="glass-input"></textarea>
+          </div>
+          <div class="form-group">
+            <label>การรักษา / Treatment</label>
+            <textarea name="treatment" rows="2" class="glass-input"></textarea>
+          </div>
+          <div class="form-group">
+            <label>สัญญาณชีพ / Vital Signs</label>
+            <input type="text" name="vital_signs" class="glass-input" placeholder="BP: 120/80, HR: 72, Temp: 36.5°C" />
+          </div>
+          <div class="form-group">
+            <label>หมายเหตุ / Notes</label>
+            <textarea name="notes" rows="2" class="glass-input"></textarea>
+          </div>
+          <div class="form-group">
+            <label>วันนัดเยี่ยมครั้งถัดไป / Next Visit Date</label>
+            <input type="date" name="next_visit_date" class="glass-input" />
+          </div>
+          <input type="hidden" name="patient_id" />
+          <input type="hidden" name="id" />
+          <div class="form-actions">
+            <button type="button" class="btn-secondary close-modal-btn">ยกเลิก / Cancel</button>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> บันทึก / Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Inactivity Warning Modal -->
+    <div id="inactivity-modal" class="modal">
+      <div class="modal-content modal-sm glass-panel">
+        <div class="modal-header warning">
+          <h2><i class="fas fa-exclamation-triangle"></i> แจ้งเตือน / Warning</h2>
+        </div>
+        <div class="inactivity-body text-center">
+          <div class="warning-icon"><i class="fas fa-hourglass-half fa-spin"></i></div>
+          <p>คุณไม่ได้ใช้งาน 30 นาที</p>
+          <p>You have been inactive for 30 minutes</p>
+          <p class="countdown mt-3">จะออกจากระบบอัตโนมัติใน <br><span id="countdown-timer"
+              class="text-danger fw-bold fs-2">300</span> วินาที</p>
+        </div>
+        <div class="form-actions mt-4">
+          <button id="stay-logged-in" class="btn-primary flex-1"><i class="fas fa-check"></i> ใช้งานต่อ / Stay</button>
+          <button id="logout-now" class="btn-danger flex-1"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ /
+            Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/patients.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
