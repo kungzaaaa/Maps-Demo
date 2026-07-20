@@ -79,20 +79,16 @@ const Patients = {
                     input.value = patient[key];
                 }
             });
-        } else {
-            // Set default coordinates (Bangkok center) for new patient
-            form.elements['latitude'].value = 13.7563;
-            form.elements['longitude'].value = 100.5018;
-            form.elements['status'].value = 'active';
         }
         
         App.showModal('patient-form-modal');
         
-        // Delay to let modal render map
+        // Delay to let modal render
         setTimeout(() => {
-            const currentLat = parseFloat(form.elements['latitude'].value) || 13.7563;
-            const currentLng = parseFloat(form.elements['longitude'].value) || 100.5018;
-            this.initLocationPicker(currentLat, currentLng);
+            this.initLocationPicker(
+                patient ? patient.latitude : 13.7563, 
+                patient ? patient.longitude : 100.5018
+            );
         }, 300);
     },
     
@@ -107,20 +103,20 @@ const Patients = {
         
         this.pickerMap = L.map(mapContainer).setView([lat, lng], 13);
         
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const tileUrl = isDark 
-            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-            
-        L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(this.pickerMap);
+        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            attribution: 'Google Maps'
+        }).addTo(this.pickerMap);
         
         this.pickerMarker = L.marker([lat, lng], { draggable: true }).addTo(this.pickerMap);
         
         const latInput = document.querySelector('input[name="latitude"]');
         const lngInput = document.querySelector('input[name="longitude"]');
         
-        latInput.value = lat;
-        lngInput.value = lng;
+        if (!latInput.value) {
+            latInput.value = lat;
+            lngInput.value = lng;
+        }
         
         this.pickerMarker.on('dragend', (e) => {
             const pos = e.target.getLatLng();
@@ -149,19 +145,11 @@ const Patients = {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
             btn.disabled = true;
             
-            // Convert lat/lng to numbers
-            const lat = parseFloat(data.latitude);
-            const lng = parseFloat(data.longitude);
+            // Convert lat/lng to numbers and fallback if NaN
+            data.latitude = parseFloat(data.latitude) || 13.7563;
+            data.longitude = parseFloat(data.longitude) || 100.5018;
             
-            if (isNaN(lat) || isNaN(lng)) {
-                Toast.show('กรุณาเลือกตำแหน่งบนแผนที่ / Please select location on map', 'warning');
-                return;
-            }
-            
-            data.latitude = lat;
-            data.longitude = lng;
-            
-            if (data.id && data.id !== "") {
+            if (data.id) {
                 // Update existing patient
                 await API.put(`/patients/${data.id}`, data);
                 Toast.show('แก้ไขข้อมูลผู้ป่วยสำเร็จ / Patient updated', 'success');

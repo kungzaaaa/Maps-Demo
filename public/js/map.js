@@ -3,12 +3,23 @@ const MapView = {
     markers: {},
     markerLayer: null,
     
-    tileLayer: null,
+    markerLayer: null,
+    
+    baseMaps: null,
+    currentLayer: null,
     
     init() {
         if (this.map) return;
         
         this.map = L.map('map', { zoomControl: false }).setView([13.7563, 100.5018], 10);
+        
+        this.baseMaps = {
+            "แผนที่ปกติ (Light)": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 20 }),
+            "แผนที่ปกติ (Dark)": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 20 }),
+            "ดาวเทียม (Google Maps)": L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: 'Google' })
+        };
+        
+        L.control.layers(this.baseMaps, null, { position: 'topright' }).addTo(this.map);
         
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         this.setTheme(isDark ? 'dark' : 'light');
@@ -21,19 +32,19 @@ const MapView = {
     },
     
     setTheme(theme) {
-        if (this.tileLayer) {
-            this.map.removeLayer(this.tileLayer);
-        }
+        if (!this.baseMaps) return;
         
-        const url = theme === 'dark' 
-            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-            
-        this.tileLayer = L.tileLayer(url, {
-            attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(this.map);
+        const isSatellite = this.map.hasLayer(this.baseMaps["ดาวเทียม (Google Maps)"]);
+        if (isSatellite) return; // Don't change if user selected satellite
+
+        this.map.removeLayer(this.baseMaps["แผนที่ปกติ (Light)"]);
+        this.map.removeLayer(this.baseMaps["แผนที่ปกติ (Dark)"]);
+        
+        if (theme === 'dark') {
+            this.baseMaps["แผนที่ปกติ (Dark)"].addTo(this.map);
+        } else {
+            this.baseMaps["แผนที่ปกติ (Light)"].addTo(this.map);
+        }
     },
     
     async loadPatients() {
