@@ -3,26 +3,38 @@ const MapView = {
     markers: {},
     markerLayer: null,
     
-    markerLayer: null,
-    
-    baseMaps: null,
-    currentLayer: null,
+    baseLayers: {},
+    layerControl: null,
     
     init() {
         if (this.map) return;
         
         this.map = L.map('map', { zoomControl: false }).setView([13.7563, 100.5018], 10);
         
-        this.baseMaps = {
-            "แผนที่ปกติ (Light)": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 20 }),
-            "แผนที่ปกติ (Dark)": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 20 }),
-            "ดาวเทียม (Google Maps)": L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: 'Google' })
+        // Base Layer Definitions
+        this.baseLayers = {
+            "🗺️ แผนที่สว่าง (Light)": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }),
+            "🌙 แผนที่มืด (Dark)": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }),
+            "🛰️ ภาพถ่ายดาวเทียม (Google Satellite)": L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                attribution: '&copy; Google Maps',
+                maxZoom: 20
+            })
         };
-        
-        L.control.layers(this.baseMaps, null, { position: 'topright' }).addTo(this.map);
-        
+
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        this.setTheme(isDark ? 'dark' : 'light');
+        this.tileLayer = isDark ? this.baseLayers["🌙 แผนที่มืด (Dark)"] : this.baseLayers["🗺️ แผนที่สว่าง (Light)"];
+        this.tileLayer.addTo(this.map);
+        
+        // Add Layer Control widget (bottom-left)
+        this.layerControl = L.control.layers(this.baseLayers, null, { position: 'bottomleft' }).addTo(this.map);
         
         L.control.zoom({ position: 'bottomright' }).addTo(this.map);
         
@@ -32,18 +44,17 @@ const MapView = {
     },
     
     setTheme(theme) {
-        if (!this.baseMaps) return;
+        if (!this.map || !this.baseLayers) return;
         
-        const isSatellite = this.map.hasLayer(this.baseMaps["ดาวเทียม (Google Maps)"]);
-        if (isSatellite) return; // Don't change if user selected satellite
+        const targetLayer = theme === 'dark' 
+            ? this.baseLayers["🌙 แผนที่มืด (Dark)"]
+            : this.baseLayers["🗺️ แผนที่สว่าง (Light)"];
 
-        this.map.removeLayer(this.baseMaps["แผนที่ปกติ (Light)"]);
-        this.map.removeLayer(this.baseMaps["แผนที่ปกติ (Dark)"]);
-        
-        if (theme === 'dark') {
-            this.baseMaps["แผนที่ปกติ (Dark)"].addTo(this.map);
-        } else {
-            this.baseMaps["แผนที่ปกติ (Light)"].addTo(this.map);
+        // Switch to theme layer if currently on standard light/dark layer
+        if (this.tileLayer && (this.tileLayer === this.baseLayers["🗺️ แผนที่สว่าง (Light)"] || this.tileLayer === this.baseLayers["🌙 แผนที่มืด (Dark)"])) {
+            this.map.removeLayer(this.tileLayer);
+            this.tileLayer = targetLayer;
+            this.tileLayer.addTo(this.map);
         }
     },
     

@@ -103,9 +103,8 @@ const Patients = {
         
         this.pickerMap = L.map(mapContainer).setView([lat, lng], 13);
         
-        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-            maxZoom: 20,
-            attribution: 'Google Maps'
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19
         }).addTo(this.pickerMap);
         
         this.pickerMarker = L.marker([lat, lng], { draggable: true }).addTo(this.pickerMap);
