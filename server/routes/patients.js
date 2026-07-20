@@ -81,8 +81,11 @@ router.post('/', sanitizeInput, auditLog('CREATE', 'patient'), async (req, res) 
     try {
         const { name, id_card, address, phone, diseases, medications, allergies, birth_date, gender, latitude, longitude, status, notes, next_visit_date } = req.body;
         
-        if (!name || !latitude || !longitude) {
-            return res.status(400).json({ error: 'กรุณาระบุชื่อและตำแหน่งที่อยู่' });
+        const lat = parseFloat(latitude);
+        const lng = parseFloat(longitude);
+
+        if (!name || isNaN(lat) || isNaN(lng)) {
+            return res.status(400).json({ error: 'กรุณาระบุชื่อและตำแหน่งที่อยู่บนแผนที่ให้ถูกต้อง' });
         }
         
         const db = await getDb();
@@ -95,7 +98,7 @@ router.post('/', sanitizeInput, auditLog('CREATE', 'patient'), async (req, res) 
         `, [
             encrypt(name), encrypt(id_card || ''), encrypt(address || ''), encrypt(phone || ''), 
             encrypt(diseases || ''), encrypt(medications || ''), encrypt(allergies || ''), 
-            birth_date || null, gender || null, parseFloat(latitude), parseFloat(longitude), 
+            birth_date || null, gender || null, lat, lng, 
             status || 'active', notes || null, next_visit_date || null, req.user.id
         ]);
         
