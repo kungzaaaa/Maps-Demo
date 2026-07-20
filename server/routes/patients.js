@@ -81,11 +81,8 @@ router.post('/', sanitizeInput, auditLog('CREATE', 'patient'), async (req, res) 
     try {
         const { name, id_card, address, phone, diseases, medications, allergies, birth_date, gender, latitude, longitude, status, notes, next_visit_date } = req.body;
         
-        const lat = parseFloat(latitude);
-        const lng = parseFloat(longitude);
-
-        if (!name || isNaN(lat) || isNaN(lng)) {
-            return res.status(400).json({ error: 'กรุณาระบุชื่อและตำแหน่งที่อยู่บนแผนที่ให้ถูกต้อง' });
+        if (!name || !latitude || !longitude) {
+            return res.status(400).json({ error: 'กรุณาระบุชื่อและตำแหน่งที่อยู่' });
         }
         
         const db = await getDb();
@@ -98,7 +95,7 @@ router.post('/', sanitizeInput, auditLog('CREATE', 'patient'), async (req, res) 
         `, [
             encrypt(name), encrypt(id_card || ''), encrypt(address || ''), encrypt(phone || ''), 
             encrypt(diseases || ''), encrypt(medications || ''), encrypt(allergies || ''), 
-            birth_date || null, gender || null, lat, lng, 
+            birth_date || null, gender || null, parseFloat(latitude), parseFloat(longitude), 
             status || 'active', notes || null, next_visit_date || null, req.user.id
         ]);
         
@@ -162,6 +159,81 @@ router.delete('/:id', async (req, res, next) => {
     } catch (error) {
         console.error('Delete patient error:', error);
         res.status(500).json({ error: 'เกิดข้อผิดพลาดในการลบข้อมูลผู้ป่วย' });
+    }
+});
+
+router.post('/sync-gmaps', sanitizeInput, auditLog('SYNC', 'gmaps'), async (req, res) => {
+    try {
+        const { gmap_url } = req.body;
+        if (!gmap_url) {
+            return res.status(400).json({ error: 'กรุณาระบุลิงก์ Google My Maps' });
+        }
+
+        const midMatch = gmap_url.match(/mid=([^&]+)/);
+        const mid = midMatch ? midMatch[1] : gmap_url;
+
+        const response = await fetch(`https://www.google.com/maps/d/kml?mid=${mid}&forcekml=1`);
+        if (!response.ok) {
+            return res.status(400).json({ error: 'ไม่สามารถดึงข้อมูล KML จาก Google My Maps ได้ กรุณาตรวจสอบลิงก์และการแชร์แบบสาธารณะ' });
+        }
+
+        const kmlText = await response.text();
+        const placemarks = kmlText.split('<Placemark>');
+        
+        const db = await getDb();
+        const allPatients = queryAll(db, 'SELECT * FROM patients');
+        const decryptedPatients = allPatients.map(decryptPatient);
+        
+        let added = 0;
+        let updated = 0;
+
+        for (let i = 1; i < placemarks.length; i++) {
+            const block = placemarks[i];
+            const nameMatch = block.match(/<name>(.*?)<\/name>/);
+            const descMatch = block.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) || block.match(/<description>(.*?)<\/description>/);
+            const coordMatch = block.match(/<coordinates>(.*?)<\/coordinates>/);
+
+            if (nameMatch && coordMatch) {
+                const name = nameMatch[1].trim();
+                const notes = descMatch ? descMatch[1].replace(/<[^>]*>?/gm, '').trim() : ''; 
+                const coords = coordMatch[1].trim().split(','); 
+                
+                if (coords.length >= 2) {
+                    const lng = parseFloat(coords[0]);
+                    const lat = parseFloat(coords[1]);
+                    
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        const existing = decryptedPatients.find(p => p.name === name);
+                        if (existing) {
+                            runSql(db, `
+                                UPDATE patients SET 
+                                    latitude = ?, longitude = ?, notes = ?, updated_at = datetime('now') 
+                                WHERE id = ?
+                            `, [lat, lng, notes, existing.id]);
+                            updated++;
+                        } else {
+                            runSql(db, `
+                                INSERT INTO patients (
+                                    encrypted_name, encrypted_id_card, encrypted_address, encrypted_phone, 
+                                    encrypted_diseases, encrypted_medications, encrypted_allergies, 
+                                    latitude, longitude, status, notes, created_by
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            `, [
+                                encrypt(name), encrypt(''), encrypt(''), encrypt(''), 
+                                encrypt(''), encrypt(''), encrypt(''), 
+                                lat, lng, 'active', notes, req.user ? req.user.id : null
+                            ]);
+                            added++;
+                        }
+                    }
+                }
+            }
+        }
+
+        res.json({ message: `ซิงค์ข้อมูลสำเร็จ (เพิ่มใหม่: ${added}, อัปเดต: ${updated})` });
+    } catch (error) {
+        console.error('Sync Google My Maps error:', error);
+        res.status(500).json({ error: 'เกิดข้อผิดพลาดในการซิงค์ข้อมูลจาก Google My Maps' });
     }
 });
 

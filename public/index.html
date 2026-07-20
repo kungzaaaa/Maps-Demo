@@ -116,6 +116,7 @@
           <option value="inactive">Inactive</option>
         </select>
         <button id="add-patient-btn" class="btn-primary"><i class="fas fa-plus"></i> เพิ่มผู้ป่วย</button>
+        <button id="sync-gmaps-btn" class="btn-secondary"><i class="fas fa-sync"></i> ซิงค์ My Maps</button>
       </div>
       <div id="patient-list" class="patient-list custom-scrollbar"></div>
     </div>
@@ -442,6 +443,27 @@
           <button id="logout-now" class="btn-danger flex-1"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ /
             Logout</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Sync Google My Maps Modal -->
+    <div id="gmaps-sync-modal" class="modal">
+      <div class="modal-content glass-panel">
+        <div class="modal-header">
+          <h2><i class="fas fa-sync"></i> ซิงค์ข้อมูลจาก Google My Maps</h2>
+          <button class="close-modal-btn">&times;</button>
+        </div>
+        <form id="gmaps-sync-form" style="padding: 1.5rem;">
+          <div class="form-group">
+            <label>ลิงก์ Google My Maps หรือ Map ID *</label>
+            <input type="url" name="gmap_url" required class="glass-input" placeholder="เช่น https://www.google.com/maps/d/viewer?mid=..." />
+            <p class="form-hint mt-2">หมายเหตุ: แผนที่ Google My Maps ต้องเปิดสิทธิ์เป็น "ทุกคนที่มีลิงก์สามารถดูได้" (Public)</p>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary close-modal-btn">ยกเลิก / Cancel</button>
+            <button type="submit" class="btn-primary" id="gmaps-sync-submit-btn"><i class="fas fa-cloud-download-alt"></i> เริ่มการซิงค์ข้อมูล</button>
+          </div>
+        </form>
       </div>
     </div>
 
