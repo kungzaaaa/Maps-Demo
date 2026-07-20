@@ -197,7 +197,7 @@ button {
 #map { width: 100%; height: 100%; background: var(--bg-secondary); }
 
 /* UI Elements Overlay on Map */
-.hamburger-btn { 
+.hamburger-btn, .theme-toggle-btn { 
     position: fixed; 
     z-index: 1000; 
     width: 50px; 
@@ -211,30 +211,14 @@ button {
     box-shadow: var(--shadow-md); 
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
-    top: 20px; 
-    left: 20px; 
-    gap: 5px; 
 }
+.hamburger-btn { top: 20px; left: 20px; gap: 5px; }
+.theme-toggle-btn { top: 20px; right: 20px; flex-direction: row; font-size: 1.2rem; color: var(--text-primary); }
 
 .hamburger-btn span { width: 20px; height: 2px; background: var(--text-primary); transition: var(--transition); border-radius: var(--radius-pill); }
 .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .hamburger-btn.active span:nth-child(2) { opacity: 0; }
 .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-/* Leaflet Layer Control Styling */
-.leaflet-control-layers {
-    background: var(--bg-primary) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 16px !important;
-    color: var(--text-primary) !important;
-    box-shadow: var(--shadow-md) !important;
-    padding: 6px 12px !important;
-    font-family: var(--font-family) !important;
-    font-size: 0.85rem !important;
-}
-.leaflet-control-layers-expanded {
-    padding: 10px 14px !important;
-}
 
 /* Sidebar */
 .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.2); z-index: 998; opacity: 0; visibility: hidden; transition: var(--transition); }

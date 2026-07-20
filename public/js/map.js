@@ -3,38 +3,15 @@ const MapView = {
     markers: {},
     markerLayer: null,
     
-    baseLayers: {},
-    layerControl: null,
+    tileLayer: null,
     
     init() {
         if (this.map) return;
         
         this.map = L.map('map', { zoomControl: false }).setView([13.7563, 100.5018], 10);
         
-        // Base Layer Definitions
-        this.baseLayers = {
-            "🗺️ แผนที่สว่าง (Light)": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; CARTO',
-                subdomains: 'abcd',
-                maxZoom: 19
-            }),
-            "🌙 แผนที่มืด (Dark)": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; CARTO',
-                subdomains: 'abcd',
-                maxZoom: 19
-            }),
-            "🛰️ ภาพถ่ายดาวเทียม (Google Satellite)": L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-                attribution: '&copy; Google Maps',
-                maxZoom: 20
-            })
-        };
-
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        this.tileLayer = isDark ? this.baseLayers["🌙 แผนที่มืด (Dark)"] : this.baseLayers["🗺️ แผนที่สว่าง (Light)"];
-        this.tileLayer.addTo(this.map);
-        
-        // Add Layer Control widget (bottom-left)
-        this.layerControl = L.control.layers(this.baseLayers, null, { position: 'bottomleft' }).addTo(this.map);
+        this.setTheme(isDark ? 'dark' : 'light');
         
         L.control.zoom({ position: 'bottomright' }).addTo(this.map);
         
@@ -44,18 +21,19 @@ const MapView = {
     },
     
     setTheme(theme) {
-        if (!this.map || !this.baseLayers) return;
-        
-        const targetLayer = theme === 'dark' 
-            ? this.baseLayers["🌙 แผนที่มืด (Dark)"]
-            : this.baseLayers["🗺️ แผนที่สว่าง (Light)"];
-
-        // Switch to theme layer if currently on standard light/dark layer
-        if (this.tileLayer && (this.tileLayer === this.baseLayers["🗺️ แผนที่สว่าง (Light)"] || this.tileLayer === this.baseLayers["🌙 แผนที่มืด (Dark)"])) {
+        if (this.tileLayer) {
             this.map.removeLayer(this.tileLayer);
-            this.tileLayer = targetLayer;
-            this.tileLayer.addTo(this.map);
         }
+        
+        const url = theme === 'dark' 
+            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+            
+        this.tileLayer = L.tileLayer(url, {
+            attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(this.map);
     },
     
     async loadPatients() {

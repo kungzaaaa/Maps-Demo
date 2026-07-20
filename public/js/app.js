@@ -55,35 +55,29 @@ const App = {
     },
     
     setupThemeToggle() {
-        const btn = document.getElementById('sidebar-theme-toggle');
-        if (!btn) return;
+        const btn = document.getElementById('theme-toggle-btn');
         const icon = btn.querySelector('i');
-        const span = btn.querySelector('span');
         
-        const updateUI = (isDark) => {
-            if (isDark) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                if (icon) { icon.className = 'fas fa-sun'; }
-                if (span) { span.textContent = 'โหมดสว่าง / Light Mode'; }
-                if (window.MapView) MapView.setTheme('dark');
-            } else {
-                document.documentElement.removeAttribute('data-theme');
-                if (icon) { icon.className = 'fas fa-moon'; }
-                if (span) { span.textContent = 'โหมดมืด / Dark Mode'; }
-                if (window.MapView) MapView.setTheme('light');
-            }
-        };
-
         // Load saved theme or default to light
         const savedTheme = localStorage.getItem('theme') || 'light';
-        updateUI(savedTheme === 'dark');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
         
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
+        btn.addEventListener('click', () => {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const nextTheme = isDark ? 'light' : 'dark';
-            localStorage.setItem('theme', nextTheme);
-            updateUI(!isDark);
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                icon.classList.replace('fa-sun', 'fa-moon');
+                if (window.MapView) MapView.setTheme('light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                if (window.MapView) MapView.setTheme('dark');
+            }
         });
     },
     

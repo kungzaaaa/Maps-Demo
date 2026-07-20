@@ -11,36 +11,6 @@ const Patients = {
         
         // Visit form submission
         document.getElementById('visit-form').addEventListener('submit', (e) => this.handleVisitSubmit(e));
-        
-        // Google My Maps Sync
-        document.getElementById('sync-gmaps-btn').addEventListener('click', () => App.openModal('gmaps-sync-modal'));
-        document.getElementById('gmaps-sync-form').addEventListener('submit', (e) => this.handleGmapsSync(e));
-    },
-    
-    async handleGmapsSync(e) {
-        e.preventDefault();
-        const btn = document.getElementById('gmaps-sync-submit-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังซิงค์...';
-        btn.disabled = true;
-        
-        const form = e.target;
-        const formData = new FormData(form);
-        const gmap_url = formData.get('gmap_url');
-        
-        try {
-            const res = await API.post('/patients/sync-gmaps', { gmap_url });
-            Toast.show(res.message || 'ซิงค์ข้อมูลสำเร็จ', 'success');
-            App.closeModal('gmaps-sync-modal');
-            form.reset();
-            await this.loadList();
-        } catch (error) {
-            console.error(error);
-            Toast.show(error.message || 'เกิดข้อผิดพลาดในการซิงค์ข้อมูล', 'error');
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
     },
     
     async loadList() {
