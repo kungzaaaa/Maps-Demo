@@ -3,35 +3,12 @@ const MapView = {
     markers: {},
     markerLayer: null,
     
-    baseMaps: {},
-    currentLayer: null,
+    tileLayer: null,
     
     init() {
         if (this.map) return;
         
         this.map = L.map('map', { zoomControl: false }).setView([13.7563, 100.5018], 10);
-        
-        const lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; CARTO', maxZoom: 19
-        });
-        const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; CARTO', maxZoom: 19
-        });
-        const satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-            attribution: '&copy; Google Maps', maxZoom: 20
-        });
-        
-        this.baseMaps = {
-            "<span class='map-layer-opt'><i class='fas fa-sun'></i> แผนที่สว่าง</span>": lightLayer,
-            "<span class='map-layer-opt'><i class='fas fa-moon'></i> แผนที่มืด</span>": darkLayer,
-            "<span class='map-layer-opt'><i class='fas fa-satellite'></i> ดาวเทียม</span>": satelliteLayer
-        };
-        
-        L.control.layers(this.baseMaps, null, { position: 'topright' }).addTo(this.map);
-        
-        this.map.on('baselayerchange', (e) => {
-            this.currentLayer = e.layer;
-        });
         
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         this.setTheme(isDark ? 'dark' : 'light');
@@ -44,21 +21,19 @@ const MapView = {
     },
     
     setTheme(theme) {
-        if (this.currentLayer && this.currentLayer === this.baseMaps["<span class='map-layer-opt'><i class='fas fa-satellite'></i> ดาวเทียม</span>"]) {
-            return;
+        if (this.tileLayer) {
+            this.map.removeLayer(this.tileLayer);
         }
         
-        const layerKey = theme === 'dark' 
-            ? "<span class='map-layer-opt'><i class='fas fa-moon'></i> แผนที่มืด</span>"
-            : "<span class='map-layer-opt'><i class='fas fa-sun'></i> แผนที่สว่าง</span>";
+        const url = theme === 'dark' 
+            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
             
-        const targetLayer = this.baseMaps[layerKey];
-        
-        if (this.currentLayer !== targetLayer) {
-            if (this.currentLayer) this.map.removeLayer(this.currentLayer);
-            this.currentLayer = targetLayer;
-            this.currentLayer.addTo(this.map);
-        }
+        this.tileLayer = L.tileLayer(url, {
+            attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(this.map);
     },
     
     async loadPatients() {
