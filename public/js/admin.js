@@ -21,36 +21,36 @@ const Admin = {
             }
         } catch (e) {
             console.error(e);
-            content.innerHTML = '<div style="text-align:center; color: #ff5252; padding: 2rem;">โหลดข้อมูลล้มเหลว / Failed to load</div>';
+            content.innerHTML = '<div style="text-align:center; color: #ff5252; padding: 2rem;">โหลดข้อมูลล้มเหลว</div>';
         }
     },
 
     showAddUserForm(content) {
         content.innerHTML = `
             <div style="max-width: 500px; margin: 20px auto;">
-                <h3 style="color: #80deea; margin-bottom: 20px;"><i class="fas fa-user-plus"></i> สร้างบัญชีผู้ใช้ใหม่ / Create New User</h3>
+                <h3 style="color: #80deea; margin-bottom: 20px;"><i class="fas fa-user-plus"></i> Create New User</h3>
                 <form id="admin-create-user-form">
                     <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">ชื่อ-นามสกุล / Full Name *</label>
+                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Name *</label>
                         <input type="text" name="full_name" required class="glass-input" style="width:100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e8eaf6;" />
                     </div>
                     <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">ชื่อผู้ใช้ / Username *</label>
+                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Username *</label>
                         <input type="text" name="username" required class="glass-input" style="width:100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e8eaf6;" />
                     </div>
                     <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">อีเมล / Email *</label>
+                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Email *</label>
                         <input type="email" name="email" required class="glass-input" style="width:100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e8eaf6;" />
                     </div>
                     <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">รหัสผ่าน / Password *</label>
+                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Password *</label>
                         <input type="text" name="password" required class="glass-input" style="width:100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e8eaf6;" placeholder="อย่างน้อย 6 ตัวอักษร" />
                     </div>
                     <div class="form-group" style="margin-bottom: 20px;">
-                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">บทบาท / Role</label>
+                        <label style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Role</label>
                         <select name="role" class="glass-input" style="width:100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e8eaf6;">
-                            <option value="doctor">🩺 Doctor - แพทย์</option>
-                            <option value="admin">👑 Admin - ผู้ดูแลระบบ</option>
+                            <option value="doctor">Doctor - แพทย์</option>
+                            <option value="admin">Admin - ผู้ดูแลระบบ</option>
                         </select>
                     </div>
                     <button type="submit" class="btn-primary" style="width:100%; padding: 12px; font-size: 1rem;"><i class="fas fa-user-plus"></i> สร้างบัญชี / Create Account</button>
@@ -75,7 +75,7 @@ const Admin = {
                 resultDiv.innerHTML = `
                     <div style="padding: 15px; border-radius: 10px; background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); color: #00e676;">
                         <h4 style="margin: 0 0 8px;"><i class="fas fa-check-circle"></i> ${res.message}</h4>
-                        <p style="margin: 0; font-size: 0.9rem;">ข้อมูลสำหรับผู้ใช้ / Credentials:</p>
+                        <p style="margin: 0; font-size: 0.9rem;">ข้อมูลสำหรับผู้ใช้:</p>
                         <div style="margin-top: 8px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 6px; font-family: monospace;">
                             <p style="margin: 2px 0;">Username: <strong>${data.username}</strong></p>
                             <p style="margin: 2px 0;">Password: <strong>${data.password}</strong></p>
@@ -110,7 +110,7 @@ const Admin = {
                 <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;">
                     <thead>
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;">
-                            <th style="padding: 12px;">ชื่อ / Name</th>
+                            <th style="padding: 12px;">Name</th>
                             <th style="padding: 12px;">Username</th>
                             <th style="padding: 12px;">Role</th>
                             <th style="padding: 12px;">Permissions</th>
