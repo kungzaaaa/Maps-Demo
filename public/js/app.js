@@ -65,7 +65,8 @@ const App = {
             icon.classList.replace('fa-moon', 'fa-sun');
         }
         
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             if (isDark) {
                 document.documentElement.removeAttribute('data-theme');
