@@ -318,3 +318,128 @@ button {
 .toast-error i { color: var(--danger); }
 .toast-warning i { color: var(--warning); }
 .toast-info i { color: var(--text-primary); }
+
+/* Custom Table Component */
+.custom-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-sm);
+    margin-top: 10px;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.88rem;
+}
+
+.custom-table th {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.custom-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.custom-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.custom-table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+/* Table Form Elements & Controls */
+.role-select {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    transition: var(--transition);
+}
+
+.role-select:focus {
+    border-color: var(--input-focus);
+}
+
+.perm-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.perm-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.perm-item:hover {
+    border-color: var(--text-primary);
+}
+
+.perm-item input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--text-primary);
+    cursor: pointer;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.action-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: var(--border-light);
+    background: transparent;
+}
+

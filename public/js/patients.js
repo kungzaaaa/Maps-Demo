@@ -43,13 +43,13 @@ const Patients = {
         const statusLabels = { active: 'Active', critical: 'Critical', inactive: 'Inactive' };
         
         listEl.innerHTML = filtered.map(p => `
-            <div class="patient-card" onclick="Patients.showDetail(${p.id})" style="padding: 15px; margin-bottom: 10px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); transition: all 0.3s;">
+            <div class="patient-card list-item" onclick="Patients.showDetail(${p.id})">
                 <div style="display:flex; justify-content: space-between; align-items:flex-start;">
-                    <h3 style="margin: 0; font-size: 1rem; color: #80deea;">${p.name || 'ไม่ระบุ'}</h3>
+                    <h3 style="margin: 0; font-size: 1rem; color: var(--text-primary);">${p.name || 'ไม่ระบุ'}</h3>
                     <span style="padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; background: ${statusColors[p.status]}22; color: ${statusColors[p.status]}; border: 1px solid ${statusColors[p.status]}44;">${statusLabels[p.status] || p.status}</span>
                 </div>
                 ${p.address ? `<p style="font-size: 0.82rem; color: var(--text-secondary); margin: 6px 0;"><i class="fas fa-map-marker-alt"></i> ${p.address}</p>` : ''}
-                ${p.next_visit_date ? `<p style="font-size: 0.82rem; color: #ffc107; margin: 4px 0;"><i class="fas fa-calendar-check"></i> นัดเยี่ยม: ${p.next_visit_date}</p>` : ''}
+                ${p.next_visit_date ? `<p style="font-size: 0.82rem; color: var(--warning); margin: 4px 0;"><i class="fas fa-calendar-check"></i> นัดเยี่ยม: ${p.next_visit_date}</p>` : ''}
                 <div style="display:flex; gap: 8px; margin-top: 10px;">
                     <button class="btn-secondary" style="padding: 5px 10px; font-size: 0.78rem;" onclick="event.stopPropagation(); MapView.flyToPatient(${p.latitude}, ${p.longitude})">
                         <i class="fas fa-crosshairs"></i> แผนที่
@@ -190,15 +190,15 @@ const Patients = {
             let visitHistory = '';
             if (visits.length > 0) {
                 visitHistory = visits.map(v => `
-                    <div style="padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border-left: 3px solid #00bcd4; margin-bottom: 8px;">
+                    <div style="padding: 12px; border-radius: 8px; background: var(--bg-secondary); border-left: 3px solid #06b6d4; margin-bottom: 8px; border-top: 1px solid var(--border-light); border-right: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <strong style="color: #80deea;">${new Date(v.visit_date).toLocaleDateString('th-TH')} ${new Date(v.visit_date).toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'})}</strong>
+                            <strong style="color: var(--text-primary);">${new Date(v.visit_date).toLocaleDateString('th-TH')} ${new Date(v.visit_date).toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'})}</strong>
                             <span style="font-size: 0.8rem; color: var(--text-secondary);">${v.visit_type || 'routine'} | Dr. ${v.doctor_name || '-'}</span>
                         </div>
-                        ${v.symptoms ? `<p style="margin: 3px 0; font-size: 0.85rem;"><strong>อาการ:</strong> ${v.symptoms}</p>` : ''}
-                        ${v.diagnosis ? `<p style="margin: 3px 0; font-size: 0.85rem;"><strong>Diagnosis:</strong> ${v.diagnosis}</p>` : ''}
-                        ${v.treatment ? `<p style="margin: 3px 0; font-size: 0.85rem;"><strong>Treatment:</strong> ${v.treatment}</p>` : ''}
-                        ${v.vital_signs ? `<p style="margin: 3px 0; font-size: 0.85rem;"><strong>Vital Signs:</strong> ${v.vital_signs}</p>` : ''}
+                        ${v.symptoms ? `<p style="margin: 3px 0; font-size: 0.85rem; color: var(--text-primary);"><strong>อาการ:</strong> ${v.symptoms}</p>` : ''}
+                        ${v.diagnosis ? `<p style="margin: 3px 0; font-size: 0.85rem; color: var(--text-primary);"><strong>Diagnosis:</strong> ${v.diagnosis}</p>` : ''}
+                        ${v.treatment ? `<p style="margin: 3px 0; font-size: 0.85rem; color: var(--text-primary);"><strong>Treatment:</strong> ${v.treatment}</p>` : ''}
+                        ${v.vital_signs ? `<p style="margin: 3px 0; font-size: 0.85rem; color: var(--text-primary);"><strong>Vital Signs:</strong> ${v.vital_signs}</p>` : ''}
                         ${v.notes ? `<p style="margin: 3px 0; font-size: 0.85rem; color: var(--text-secondary);"><i class="fas fa-sticky-note"></i> ${v.notes}</p>` : ''}
                     </div>
                 `).join('');
@@ -208,9 +208,9 @@ const Patients = {
             
             const content = `
                 <div style="padding: 1.5rem;">
-                    <div style="padding: 15px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 15px;">
-                        <h3 style="color: #80deea; margin-bottom: 10px;"><i class="fas fa-id-card"></i> ข้อมูลส่วนตัว / Personal Info</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9rem;">
+                    <div class="data-card" style="margin-bottom: 15px;">
+                        <h3 style="color: var(--text-primary); margin-bottom: 10px;"><i class="fas fa-id-card"></i> ข้อมูลส่วนตัว / Personal Info</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9rem; color: var(--text-primary);">
                             <p><strong>สถานะ:</strong> <span style="color: ${statusColors[patient.status]}">${patient.status}</span></p>
                             <p><strong>เพศ:</strong> ${genderLabels[patient.gender] || '-'}</p>
                             <p><strong>วันเกิด:</strong> ${patient.birth_date || '-'}</p>
@@ -221,9 +221,9 @@ const Patients = {
                         </div>
                     </div>
                     
-                    <div style="padding: 15px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 15px;">
-                        <h3 style="color: #80deea; margin-bottom: 10px;"><i class="fas fa-heartbeat"></i> ข้อมูลทางการแพทย์ / Medical Info</h3>
-                        <div style="font-size: 0.9rem;">
+                    <div class="data-card" style="margin-bottom: 15px;">
+                        <h3 style="color: var(--text-primary); margin-bottom: 10px;"><i class="fas fa-heartbeat"></i> ข้อมูลทางการแพทย์ / Medical Info</h3>
+                        <div style="font-size: 0.9rem; color: var(--text-primary);">
                             <p><strong>โรคประจำตัว / Diseases:</strong> ${patient.diseases || '-'}</p>
                             <p><strong>ยาที่ใช้ / Medications:</strong> ${patient.medications || '-'}</p>
                             <p><strong>ประวัติแพ้ยา / Allergies:</strong> ${patient.allergies || '-'}</p>
@@ -231,9 +231,9 @@ const Patients = {
                         </div>
                     </div>
                     
-                    <div style="padding: 15px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 15px;">
+                    <div class="data-card" style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <h3 style="color: #80deea; margin: 0;"><i class="fas fa-notes-medical"></i> ประวัติการเยี่ยม / Visit History</h3>
+                            <h3 style="color: var(--text-primary); margin: 0;"><i class="fas fa-notes-medical"></i> ประวัติการเยี่ยม / Visit History</h3>
                             <button class="btn-primary" style="padding: 5px 12px; font-size: 0.8rem;" onclick="Patients.showVisitForm(${patient.id})">
                                 <i class="fas fa-plus"></i> บันทึกการเยี่ยม
                             </button>

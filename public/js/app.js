@@ -173,14 +173,14 @@ const App = {
             }
             
             container.innerHTML = visits.map(p => `
-                <div style="padding: 12px; margin: 8px 0; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid #ffc107; cursor: pointer;" onclick="Patients.showDetail(${p.id})">
-                    <h4 style="margin: 0; color: #80deea;">${p.name || 'ไม่ระบุ'}</h4>
-                    <p style="margin: 4px 0 0; font-size: 0.85rem; color: #ffc107;"><i class="fas fa-calendar-day"></i> นัดเยี่ยม: ${p.next_visit_date}</p>
+                <div class="list-item" style="border-left: 3px solid var(--warning);" onclick="Patients.showDetail(${p.id})">
+                    <h4 style="margin: 0; color: var(--text-primary);">${p.name || 'ไม่ระบุ'}</h4>
+                    <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--warning);"><i class="fas fa-calendar-day"></i> นัดเยี่ยม: ${p.next_visit_date}</p>
                 </div>
             `).join('');
         } catch (e) {
             console.error(e);
-            container.innerHTML = '<div style="text-align:center; color: #ff5252; padding: 2rem;">โหลดข้อมูลล้มเหลว</div>';
+            container.innerHTML = '<div style="text-align:center; color: var(--danger); padding: 2rem;">โหลดข้อมูลล้มเหลว</div>';
         }
     },
     
@@ -192,17 +192,17 @@ const App = {
             const visits = await API.get('/visits/upcoming');
             
             if (!visits || visits.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color: var(--text-secondary); padding: 2rem;"><i class="fas fa-calendar-alt" style="font-size: 2rem; color: #00bcd4; margin-bottom: 10px; display: block;"></i>ไม่มีนัดเยี่ยมใน 7 วันข้างหน้า / No upcoming visits</div>';
+                container.innerHTML = '<div style="text-align:center; color: var(--text-secondary); padding: 2rem;"><i class="fas fa-calendar-alt" style="font-size: 2rem; color: #06b6d4; margin-bottom: 10px; display: block;"></i>ไม่มีนัดเยี่ยมใน 7 วันข้างหน้า / No upcoming visits</div>';
                 return;
             }
             
             container.innerHTML = visits.map(p => {
                 const daysLeft = Math.ceil((new Date(p.next_visit_date) - new Date()) / (1000 * 60 * 60 * 24));
-                const urgencyColor = daysLeft <= 1 ? '#ff5252' : daysLeft <= 3 ? '#ffc107' : '#00e676';
+                const urgencyColor = daysLeft <= 1 ? 'var(--danger)' : daysLeft <= 3 ? 'var(--warning)' : 'var(--success)';
                 return `
-                    <div style="padding: 12px; margin: 8px 0; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid ${urgencyColor}; cursor: pointer;" onclick="Patients.showDetail(${p.id})">
+                    <div class="list-item" style="border-left: 3px solid ${urgencyColor};" onclick="Patients.showDetail(${p.id})">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h4 style="margin: 0; color: #80deea;">${p.name || 'ไม่ระบุ'}</h4>
+                            <h4 style="margin: 0; color: var(--text-primary);">${p.name || 'ไม่ระบุ'}</h4>
                             <span style="font-size: 0.8rem; color: ${urgencyColor}; font-weight: 600;">อีก ${daysLeft} วัน</span>
                         </div>
                         <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-secondary);"><i class="fas fa-calendar-alt"></i> ${p.next_visit_date}</p>
